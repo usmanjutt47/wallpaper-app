@@ -3,6 +3,7 @@ import React from "react";
 import { Data } from "../../constant/Data";
 import { wp } from "../../helpers/Common";
 import { theme } from "../../constant/Theme";
+import Animated, { FadeIn, FadeInRight } from "react-native-reanimated";
 
 const Categories = ({ activeCategory, handleChangeCategory }) => {
   return (
@@ -30,13 +31,17 @@ const CategoryItem = ({ title, index, isActive, handleChangeCategory }) => {
     ? theme.colors.neutral(0.8)
     : theme.colors.white;
   return (
-    <View>
+    <Animated.View
+      entering={FadeInRight.delay(index * 200)
+        .duration(1000)
+        .springify()
+        .damping(14)}>
       <Pressable
         style={[styles.category, { backgroundColor }]}
         onPress={() => handleChangeCategory(isActive ? null : title)}>
         <Text style={[styles.title, { color }]}>{title}</Text>
       </Pressable>
-    </View>
+    </Animated.View>
   );
 };
 
