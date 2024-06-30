@@ -6,24 +6,42 @@ import {
   TextInput,
   View,
 } from "react-native";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { theme } from "../../constant/Theme";
 import { hp, wp } from "../../helpers/Common";
 import Categories from "../components/Categories";
+import { apiCall } from "../../api";
+import ImageGride from "../components/ImageGride";
 
 const HomeScreen = () => {
   const { top } = useSafeAreaInsets();
   const paddingTop = top > 0 ? top + 10 : 30;
   const [search, setSearch] = useState("");
   const searchInputRef = useRef(null);
+  const [images, setImages] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
 
   const handleChangeCategory = (cat) => {
     setActiveCategory(cat);
   };
-  console.log("Active", activeCategory);
+
+  useEffect(() => {
+    fetchImages();
+  }, []);
+
+  const fetchImages = async (params = { page: 1 }, append = false) => {
+    let res = await apiCall(params);
+    if (res.success && res?.data.hits) {
+      if (append) {
+        setImages([...images, ...images, ...res.data.hits]);
+      } else {
+        setImages([...res.data.hits]);
+      }
+    }
+  };
+
   return (
     <View style={[styles.container, { paddingTop }]}>
       <View style={styles.header}>
@@ -39,7 +57,7 @@ const HomeScreen = () => {
         </Pressable>
       </View>
       <ScrollView
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator
         contentContainerStyle={{ gap: 15 }}>
         <View style={styles.searchBar}>
           <View style={styles.searchIcon}>
@@ -72,6 +90,7 @@ const HomeScreen = () => {
             handleChangeCategory={handleChangeCategory}
           />
         </View>
+        <View>{images.length > 0 && <ImageGride images={images} />}</View>
       </ScrollView>
     </View>
   );
