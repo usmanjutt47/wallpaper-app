@@ -11,11 +11,13 @@
   "dependencies": {
     "@expo/metro-runtime": "^3.2.1",
     "@expo/vector-icons": "^14.0.2",
+    "@gorhom/bottom-sheet": "^4.6.3",
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/stack": "^6.3.29",
     "@shopify/flash-list": "^1.6.4",
     "axios": "^1.7.2",
     "expo": "~51.0.17",
+    "expo-blur": "^13.0.2",
     "expo-image": "~1.12.12",
     "expo-linear-gradient": "^13.0.2",
     "expo-status-bar": "~1.12.1",
