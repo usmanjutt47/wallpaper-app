@@ -17,6 +17,7 @@ import { apiCall } from "../../api";
 import ImageGride from "../components/ImageGride";
 import { debounce, filter } from "lodash";
 import FilterModal from "../components/FilterModal";
+import { useRoute } from "@react-navigation/native";
 
 var page = 1;
 
@@ -29,6 +30,9 @@ const HomeScreen = () => {
   const [activeCategory, setActiveCategory] = useState(null);
   const modalRef = useRef(null);
   const [filters, setFilters] = useState(null);
+  const scrollRef = useRef(null);
+  const [isEndReached, setIsEndReached] = useState(false);
+  const [router] = useRoute();
 
   const handleChangeCategory = (cat) => {
     setActiveCategory(cat);
@@ -47,7 +51,7 @@ const HomeScreen = () => {
     fetchImages();
   }, []);
 
-  const fetchImages = async (params = { page: 1 }, append = false) => {
+  const fetchImages = async (params = { page: 1 }, append = true) => {
     let res = await apiCall(params);
     if (res.success && res?.data.hits) {
       if (append) {
@@ -136,10 +140,41 @@ const HomeScreen = () => {
     fetchImages(params, false);
   };
 
+  const handleScroll = (event) => {
+    const contentHeight = event.nativeEvent.contentSize.height;
+    const scrollViewHeight = event.nativeEvent.layoutMeasurement.height;
+    const scrollOffset = event.nativeEvent.contentOffset.y;
+    const bottomPosition = contentHeight - scrollViewHeight;
+
+    if (scrollOffset >= bottomPosition - 1) {
+      if (!isEndReached) {
+        setIsEndReached(true);
+        console.log("reached bottom of the scrollView");
+        ++page;
+        let params = {
+          page,
+          ...filters,
+        };
+        if (activeCategory) params.category = activeCategory;
+        if (search) params.q = search;
+        fetchImages(params);
+      }
+    } else if (isEndReached) {
+      setIsEndReached(false);
+    }
+  };
+
+  const handleScrollUp = () => {
+    scrollRef?.current?.scrollTo({
+      y: 0,
+      animated: true,
+    });
+  };
+
   return (
     <View style={[styles.container, { paddingTop }]}>
       <View style={styles.header}>
-        <Pressable>
+        <Pressable onPress={handleScrollUp}>
           <Text style={styles.title}>Pixels</Text>
         </Pressable>
         <Pressable onPress={openFilersModal}>
@@ -151,6 +186,9 @@ const HomeScreen = () => {
         </Pressable>
       </View>
       <ScrollView
+        onScroll={handleScroll}
+        scrollEventThrottle={5}
+        ref={scrollRef}
         showsVerticalScrollIndicator
         contentContainerStyle={{ gap: 15 }}
       >
@@ -227,11 +265,13 @@ const HomeScreen = () => {
           </View>
         )}
 
-        <View>{images.length > 0 && <ImageGride images={images} />}</View>
+        <View>
+          {images.length > 0 && <ImageGride images={images} router={router} />}
+        </View>
         <View
           style={{ marginBottom: 70, marginTop: images.length > 0 ? 10 : 70 }}
         >
-          <ActivityIndicator size={"large"} />
+          <ActivityIndicator size={"large"} color={theme.colors.black} />
         </View>
       </ScrollView>
       <FilterModal

@@ -145,7 +145,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    marginTop: "20%",
   },
   applyButton: {
     flex: 1,
